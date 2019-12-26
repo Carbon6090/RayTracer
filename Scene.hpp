@@ -74,11 +74,19 @@ Scene::Scene(const string& path) {
 			ss >> materialName;
 			string description;
 			getline(ss, description);
+			string material;
 
-			string material = GetMaterialByName(materialName);
+			if (materialName == "random") {
+				Material m;
+				m.Random();
+				material = m.ToString();
+			}
+			else {
+				material = GetMaterialByName(materialName);
 
-			if (material == "")
-				cout << "Unknown material '" << materialName << "'" << endl;
+				if (material == "")
+					cout << "Unknown material '" << materialName << "'" << endl;
+			}
 
 			shapes.push_back(new Sphere(description + " " + material));
 		}
