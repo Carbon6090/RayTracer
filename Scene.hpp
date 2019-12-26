@@ -15,6 +15,9 @@ class Scene{
 	vector<Shape*> shapes;
 	vector<Light> lights;
 	vector<NamedMaterial> materials;
+
+	string GetMaterialByName(string name);
+
 public:	
 	Scene();
 	Scene(const string& path);
@@ -24,6 +27,14 @@ public:
 
 	Shape* operator[](int index);
 };
+
+string Scene::GetMaterialByName(string name){
+	for (int i = 0; i < materials.size(); i++)
+		if (name == materials[i].name)
+			return materials[i].material;
+
+	return "";
+}
 
 Scene::Scene(){
 	Material ivory = { Vector(0.4, 0.4, 0.3), 50, { 0.6, 0.3, 0.1, 0.0 }, 1.0}; 
@@ -51,7 +62,7 @@ Scene::Scene(const string& path) {
 	string line;
 
 	while (getline(f, line)) {
-		if (line == "")
+		if (line == "" || line[0] == '#')
 			continue;
 
 		stringstream ss(line);
@@ -59,13 +70,21 @@ Scene::Scene(const string& path) {
 		ss >> name;
 
 		if (name == "sphere") {
+			string materialName;
+			ss >> materialName;
 			string description;
 			getline(ss, description);
-			shapes.push_back(new Sphere(description));
+
+			string material = GetMaterialByName(materialName);
+
+			if (material == "")
+				cout << "Unknown material '" << materialName << "'" << endl;
+
+			shapes.push_back(new Sphere(description + " " + material));
 		}
 		else if (name == "light") {
 			string description;
-			getline(ss, description);
+			getline(ss, description);			
 			lights.push_back(Light(description));
 		}
 		else if (name == "material"){
@@ -73,6 +92,9 @@ Scene::Scene(const string& path) {
 			ss >> materialName;
 			getline(ss, material);
 			materials.push_back({ materialName, material });
+		}
+		else {
+			cout << "Error: '" << line << "'" << endl;
 		}
 	}
 
